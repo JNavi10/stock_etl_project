@@ -12,9 +12,9 @@ services:
     env_file:
       - .env
     volumes:
-      - ./dags:/opt/airflow/dags
       - ./scripts:/opt/airflow/scripts
-      - ./data:/opt/airflow/data
+      - ./dags:/opt/airflow/dags
+      - ./gcp-service-account.json:/opt/airflow/gcp-service-account.json:ro
     ports:
       - "8080:8080"
     command: >

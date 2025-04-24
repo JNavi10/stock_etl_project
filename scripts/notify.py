@@ -16,7 +16,7 @@ def notify_anomalies(df, sender, recipient, password, dry_run=False):
 
         body_lines.append(
             f"- {row['Ticker']}: {change} → "
-            f"O:{open_price} H:{high_price} L:{low_price} C:{close_price}{anomaly_flag}"
+            f"Open:{open_price} High:{high_price} Low:{low_price} Close:{close_price}{anomaly_flag}"
         )
 
     body = "\n".join(body_lines)
