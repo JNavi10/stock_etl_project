@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-from scripts.load import load
+from scripts.load_to_gcs import load
 
 def test_load_saves_file():
     df = pd.DataFrame({"A": [1], "B": [2]})
