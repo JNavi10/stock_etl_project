@@ -7,6 +7,8 @@ import os
 import sys
 import pandas as pd
 from dotenv import load_dotenv
+import pandas_market_calendars as mcal
+from pendulum import timezone
 
 # Airflow container paths
 sys.path.append("/opt/airflow")
@@ -31,9 +33,24 @@ RAW_PATH = "/tmp/raw.pkl"
 TICKERS_PATH = "/tmp/tickers.txt"
 TRANSFORMED_PATH = "/tmp/transformed.pkl"
 
+def is_market_open(date):
+    nyse = mcal.get_calendar('NYSE')
+    schedule = nyse.schedule(start_date=date, end_date=date)
+    return not schedule.empty
+
 # Step 1: Extract
 def extract_task(**kwargs):
+
+    today = datetime.utcnow().date()
+
+    if not is_market_open(today):
+        raise ValueError(f"Market closed on {today}, skipping extract.")
+
     raw_df, tickers = extract()
+    if raw_df.empty:
+        raise ValueError("Extract Task: raw_df is empty.")
+    if not tickers:
+        raise ValueError("Extract Task: tickers list is empty.")
     raw_df.to_pickle(RAW_PATH)
     with open(TICKERS_PATH, "w") as f:
         f.write(",".join(tickers))
@@ -72,8 +89,8 @@ dag = DAG(
     dag_id='stock_pipeline_dag',
     default_args=default_args,
     description='Daily stock ETL pipeline with anomaly notifications and BigQuery load',
-    schedule_interval='0 7 * * *',
-    start_date=datetime(2024, 1, 1),
+    schedule_interval='0 7 * * 2-6',
+    start_date=datetime(2024, 1, 1, tzinfo=timezone('Asia/Seoul')),
     catchup=False
 )
 
